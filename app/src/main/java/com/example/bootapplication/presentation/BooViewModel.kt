@@ -25,10 +25,10 @@ class BooViewModel(
 
             _result.value = when (result) {
                 is BootResult.Content -> {
-                    val list =  result.boots
+                    val list = result.boots
                     val stringBuilder = StringBuilder()
-                    for (boot in list){
-                        stringBuilder.append("${boot.id} - ${boot.timestamp}\n")
+                    for (boot in list) {
+                        stringBuilder.append("\u2022 ${boot.id} - ${boot.timestamp}\n")
                     }
                     MainState.Content(stringBuilder.toString())
                 }

@@ -15,6 +15,11 @@ class BootApp : Application() {
 
     override fun onCreate() {
         super.onCreate()
+        initKoin()
+        doJobNotification()
+    }
+
+    private fun initKoin() {
         startKoin {
             androidLogger(Level.DEBUG)
             androidContext(applicationContext)
@@ -24,8 +29,6 @@ class BootApp : Application() {
                 )
             )
         }
-
-        doJobNotification()
     }
 
     private fun doJobNotification() {
@@ -35,11 +38,11 @@ class BootApp : Application() {
             JOB_ID,
             ComponentName(applicationContext, NotificationJobService::class.java)
         )
-        val job = builder
-            .setPersisted(true)
+        val jobInfo = builder
             .setMinimumLatency(PERIODIC)
+            .setPersisted(true)
             .build()
-        mScheduler.schedule(job)
+        mScheduler.schedule(jobInfo)
     }
 
     companion object {

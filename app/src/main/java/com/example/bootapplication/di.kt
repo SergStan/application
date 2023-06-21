@@ -14,12 +14,14 @@ import org.koin.core.qualifier.named
 import org.koin.dsl.module
 
 const val DATA_BASE = "boot-database"
+const val IO_DISPATCHER = "io"
+const val MAIN_DISPATCHER = "main"
 
 val bootModule = module {
 
     single<Context> { androidApplication() }
-    single<CoroutineDispatcher>(named("io")) { Dispatchers.IO }
-    single<CoroutineDispatcher>(named("main")) { Dispatchers.Main }
+    single<CoroutineDispatcher>(named(IO_DISPATCHER)) { Dispatchers.IO }
+    single<CoroutineDispatcher>(named(MAIN_DISPATCHER)) { Dispatchers.Main }
     single {
         Room.databaseBuilder(
             get(),
@@ -31,7 +33,7 @@ val bootModule = module {
         val database = get<BootDatabase>()
         database.bootDao()
     }
-    single<AppRepository> { BootRepository(get(), get(named("io"))) }
+    single<AppRepository> { BootRepository(get(), get(named(IO_DISPATCHER))) }
     viewModel {
         BooViewModel(
             get(),

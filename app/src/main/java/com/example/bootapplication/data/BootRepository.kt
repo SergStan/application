@@ -16,14 +16,30 @@ class BootRepository(
             } catch (throwable: Throwable) {
                 BootResult.Error(throwable)
             }
-
         }
     }
 
-    override suspend fun insertBoot(boot: Boot): Boolean {
-        bootDao.insert(boot)
-        return true
+    override suspend fun insertBoot(): Boolean {
+        return when (val countResult = getCount()) {
+            is CountResult.Content -> {
+                bootDao.insert(Boot(countResult.count + 1L))
+                true
+            }
+
+            is CountResult.Error -> {
+                false
+            }
+        }
     }
 
-
+    override suspend fun getCount(): CountResult {
+        return withContext(ioCoroutineDispatcher) {
+            try {
+                val result = bootDao.getCount()
+                CountResult.Content(result)
+            } catch (throwable: Throwable) {
+                CountResult.Error(throwable)
+            }
+        }
+    }
 }

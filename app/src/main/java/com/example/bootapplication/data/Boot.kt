@@ -5,7 +5,7 @@ import androidx.room.PrimaryKey
 
 @Entity
 data class Boot (
-    @PrimaryKey(autoGenerate = true)
+    @PrimaryKey()
     val id: Long,
     val timestamp: Long = System.currentTimeMillis()
 )

@@ -1,3 +1,13 @@
 <resources>
     <string name="app_name">BootApplication</string>
-</resources>
+    <string name="no_boots_detected">No boots detected</string>
+    <string name="one_boots_detected">The boot was detected with the timestamp = </string>
+    <string name="more_boots_detected">Last boots time delta = </string>
+    <string name="empty">empty</string>
+    <string name="first">first</string>
+    <string name="average">average: more than one</string>
+    <string name="error_notification">error notification</string>
+    <string name="error">error</string>
+    <string name="init_title">init title</string>
+    <string name="init_message">init message</string>
+  </resources>

@@ -11,6 +11,9 @@ interface BootDao {
     @Query("SELECT * FROM boot")
     fun getAll(): List<Boot>
 
-     @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insert(Boot: Boot)
+
+    @Query("SELECT COUNT(id) FROM boot")
+    fun getCount(): Long
 }

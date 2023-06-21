@@ -8,31 +8,61 @@ import android.app.job.JobService
 import android.content.Intent
 import android.os.Build
 import androidx.core.app.NotificationCompat
+import com.example.bootapplication.IO_DISPATCHER
 import com.example.bootapplication.R
+import com.example.bootapplication.data.AppRepository
+import com.example.bootapplication.data.BootResult
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import org.koin.core.qualifier.named
+import org.koin.java.KoinJavaComponent
 
 class NotificationJobService : JobService() {
 
+    private val repository: AppRepository = KoinJavaComponent.getKoin().get()
+    private val io: CoroutineDispatcher = KoinJavaComponent.getKoin().get(named(IO_DISPATCHER))
+
     override fun onStartJob(params: JobParameters?): Boolean {
 
-        // TODO: implement getting from BD
+        var title: String = applicationContext.resources.getString(R.string.init_title)
+        var message: String = applicationContext.resources.getString(R.string.init_message)
 
-        //        repository.getAll()
-        // inject by Koin or
-        //  using maybe custom Static repository SERVICE
+        runBlocking {
+            launch(io) {
+                when (val result = repository.getAll()) {
+                    is BootResult.Content -> {
+                        val list = result.boots
+                        message = when (list.size) {
+                            ZERO_SIZE -> {
+                                title = applicationContext.resources.getString(R.string.empty)
+                                applicationContext.resources.getString(R.string.no_boots_detected)
+                            }
 
+                            SINGLE -> {
+                                title = applicationContext.resources.getString(R.string.first)
+                                applicationContext.resources.getString(R.string.one_boots_detected) + list[FIRST_ELEMENT_INDEX].timestamp
+                            }
 
-        // TODO: prepare logic according task with getting empty or first or last with average in case last
+                            else -> {
+                                title = applicationContext.resources.getString(R.string.average)
+                                val average =
+                                    (list[FIRST_ELEMENT_INDEX].timestamp + list[SECOND_ELEMENT_INDEX].timestamp) / AVERAGE_DIVIDER
+                                applicationContext.resources.getString(R.string.one_boots_detected) + average
+                            }
+                        }
+                    }
 
-        //        var id: String = ""
-        //        var timestamp: String = ""
-
-
-        var id: String = ""
-        var timestamp: String = ""
-
+                    is BootResult.Error -> {
+                        title = applicationContext.resources.getString(R.string.error_notification)
+                        message = applicationContext.resources.getString(R.string.error)
+                    }
+                }
+            }
+        }
 
         val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationChannel(
                 ID,
                 NAME,
@@ -49,12 +79,10 @@ class NotificationJobService : JobService() {
         )
         val builder = NotificationCompat.Builder(this, ID)
             .setSmallIcon(R.drawable.ic_launcher_foreground)
-            .setContentTitle(id)
-            .setContentText(timestamp)
-            .setAutoCancel(true)
+            .setContentTitle(title)
+            .setContentText(message)
             .setContentIntent(pendingIntent)
-
-        notificationManager.notify(0, builder.build())
+        notificationManager.notify(2, builder.build())
         return false
     }
 
@@ -62,8 +90,13 @@ class NotificationJobService : JobService() {
         return true
     }
 
-    companion object{
+    companion object {
         private const val ID = "id"
         private const val NAME = "name"
+        private const val ZERO_SIZE = 0
+        private const val SINGLE = 1
+        private const val AVERAGE_DIVIDER = 2
+        private const val FIRST_ELEMENT_INDEX = 0
+        private const val SECOND_ELEMENT_INDEX = 1
     }
 }
